@@ -18,7 +18,9 @@ import {
   UserCircleIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
-
+import imgLogo1 from '@/public/images/logo/logo.svg'
+import imgLogo2 from '@/public/images/logo/logo-dark.svg'
+import imgLogo3 from '@/public/images/logo/logo-icon.svg'
 type NavItem = {
   name: string;
   icon: React.ReactNode;
@@ -30,7 +32,7 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    path: "/",
   },
   {
     icon: <CalenderIcon />,
@@ -88,7 +90,7 @@ const othersItems: NavItem[] = [
     icon: <PlugInIcon />,
     name: "Authentication",
     subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
+      { name: "login", path: "/signin", pro: false },
       { name: "Sign Up", path: "/signup", pro: false },
     ],
   },
@@ -233,9 +235,17 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => path === pathname;
-   const isActive = useCallback((path: string) => path === pathname, [pathname]);
+const isActive = useCallback(
+  (path: string) => {
+    if (!pathname) return false;
 
+    const parts = pathname.split("/");
+    const withoutLang = "/" + parts.slice(2).join("/"); 
+
+    return withoutLang === path;
+  },
+  [pathname]
+);
   useEffect(() => {
     // Check if the current path matches any submenu item
     let submenuMatched = false;
@@ -290,7 +300,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 md:start-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -313,14 +323,14 @@ const AppSidebar: React.FC = () => {
             <>
               <Image
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src={imgLogo1}
                 alt="Logo"
                 width={150}
                 height={40}
               />
               <Image
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src={imgLogo2}
                 alt="Logo"
                 width={150}
                 height={40}
@@ -328,7 +338,7 @@ const AppSidebar: React.FC = () => {
             </>
           ) : (
             <Image
-              src="/images/logo/logo-icon.svg"
+              src={imgLogo3}
               alt="Logo"
               width={32}
               height={32}
@@ -374,7 +384,6 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
   );
