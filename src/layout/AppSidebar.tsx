@@ -17,10 +17,7 @@ import {
   TableIcon,
   UserCircleIcon,
 } from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
-import imgLogo1 from '@/public/images/logo/logo.svg'
-import imgLogo2 from '@/public/images/logo/logo-dark.svg'
-import imgLogo3 from '@/public/images/logo/logo-icon.svg'
+
 type NavItem = {
   name: string;
   icon: React.ReactNode;
@@ -323,14 +320,14 @@ const isActive = useCallback(
             <>
               <Image
                 className="dark:hidden"
-                src={imgLogo1}
+                src="/images/logo/logo.svg"
                 alt="Logo"
                 width={150}
                 height={40}
               />
               <Image
                 className="hidden dark:block"
-                src={imgLogo2}
+                src="/images/logo/logo-dark.svg"
                 alt="Logo"
                 width={150}
                 height={40}
@@ -338,7 +335,7 @@ const isActive = useCallback(
             </>
           ) : (
             <Image
-              src={imgLogo3}
+              src="/images/logo/logo-icon.svg"
               alt="Logo"
               width={32}
               height={32}
