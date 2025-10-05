@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { logout as logoutService } from "@/services/auth";
+import { logout as logoutService } from "@/api/methods/auth";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
 import userImg from  '@/public/images/user/default-avatar.jpg'

@@ -1,17 +1,19 @@
-"use client";
+'use client';
 
-import Checkbox from "@/components/form/input/Checkbox";
-import Input from "@/components/form/input/InputField";
-import Label from "@/components/form/Label";
-import Button from "@/components/ui/button/Button";
-import { EyeCloseIcon, EyeIcon } from "@/icons";
-import Link from "next/link";
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { login } from "@/services/auth";
-import { toast } from "sonner";
+import Checkbox from '@/components/form/input/Checkbox';
+import Input from '@/components/form/input/InputField';
+import Label from '@/components/form/Label';
+import Button from '@/components/ui/button/Button';
+import { EyeCloseIcon, EyeIcon } from '@/icons';
+import Link from 'next/link';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useMutation } from '@tanstack/react-query';
+import { login } from '@/api/methods/auth';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface FormValues {
   email: string;
@@ -23,80 +25,83 @@ export default function SignInForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({
-    defaultValues: {
-      email: "",
-      password: "",
+    defaultValues: { email: '', password: '' },
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: (data) => {
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.data));
+
+        // تحديث Zustand
+        useAuthStore.getState().setAuth(data.data, data.token);
+
+        // تخزين الكوكيز (في حال SSR)
+        document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+
+        toast.success(data.message || t('login.loginSuccess'));
+        router.push('/');
+      } else {
+        toast.error(data.message || t('login.loginFailed'));
+      }
+    },
+    onError: (err: any) => {
+      const message = err?.response?.data?.message || t('login.loginFailed');
+      toast.error(message);
     },
   });
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    setLoading(true);
-    console.log(data)
-    try {
-      const res = await login(data);
-      if (res.token) {
-        toast.success(res.message || t("login.loginSuccess"));
-        router.push("/");
-      } else {
-        toast.error(res.message || t("login.loginFailed"));
-      }
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.message || t("login.loginFailed");
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+  const onSubmit: SubmitHandler<FormValues> = (formData) => {
+    loginMutation.mutate(formData);
   };
 
   return (
-    <div className="flex flex-col flex-1 lg:w-1/2 w-full">
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+    <div className="flex w-full flex-1 flex-col lg:w-1/2">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
         <div className="mb-5 sm:mb-8">
-          <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-            {t("login.title")}
+          <h1 className="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 dark:text-white/90">
+            {t('login.title')}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t("login.subtitle")}
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('login.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-6">
+            {/* Email */}
             <div>
               <Label>
-                {t("login.email")} <span className="text-error-500">*</span>
+                {t('login.email')} <span className="text-error-500">*</span>
               </Label>
               <Input
-                {...register("email", { required: t("login.emailRequired") })}
-                placeholder={t("login.emailPlaceholder")}
+                {...register('email', { required: t('login.emailRequired') })}
+                placeholder={t('login.emailPlaceholder')}
                 type="email"
               />
-              {errors.email && (
-                <span className="text-red-500 text-sm">{errors.email.message}</span>
-              )}
+              {errors.email && <span className="text-sm text-red-500">{errors.email.message}</span>}
             </div>
 
+            {/* Password */}
             <div>
               <Label>
-                {t("login.password")} <span className="text-error-500">*</span>
+                {t('login.password')} <span className="text-error-500">*</span>
               </Label>
               <div className="relative">
                 <Input
-                  {...register("password", { required: t("login.passwordRequired") })}
-                  type={showPassword ? "text" : "password"}
-                  placeholder={t("login.passwordPlaceholder")}
+                  {...register('password', { required: t('login.passwordRequired') })}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={t('login.passwordPlaceholder')}
                 />
                 <span
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute z-30 -translate-y-1/2 cursor-pointer end-4 top-1/2"
+                  className="absolute end-4 top-1/2 z-30 -translate-y-1/2 cursor-pointer"
                 >
                   {showPassword ? (
                     <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
@@ -106,41 +111,43 @@ export default function SignInForm() {
                 </span>
               </div>
               {errors.password && (
-                <span className="text-red-500 text-sm">{errors.password.message}</span>
+                <span className="text-sm text-red-500">{errors.password.message}</span>
               )}
             </div>
 
+            {/* Remember & Forgot */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Checkbox checked={isChecked} onChange={setIsChecked} />
-                <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                  {t("login.rememberMe")}
+                <span className="text-theme-sm block font-normal text-gray-700 dark:text-gray-400">
+                  {t('login.rememberMe')}
                 </span>
               </div>
               <Link
                 href="/reset-password"
-                className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                className="text-brand-500 hover:text-brand-600 dark:text-brand-400 text-sm"
               >
-                {t("login.forgotPassword")}
+                {t('login.forgotPassword')}
               </Link>
             </div>
 
+            {/* Submit */}
             <div>
-              <Button className="w-full" size="sm" disabled={loading}>
-                {loading ? t("login.loggingIn") : t("login.loginButton")}
+              <Button className="w-full" size="sm" disabled={loginMutation.isLoading}>
+                {loginMutation.isLoading ? t('login.loggingIn') : t('login.loginButton')}
               </Button>
             </div>
           </div>
         </form>
 
         <div className="mt-5">
-          <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-            {t("login.noAccount")}{" "}
+          <p className="text-center text-sm font-normal text-gray-700 sm:text-start dark:text-gray-400">
+            {t('login.noAccount')}{' '}
             <Link
               href="/signup"
               className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
             >
-              {t("login.signUp")}
+              {t('login.signUp')}
             </Link>
           </p>
         </div>
