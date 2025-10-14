@@ -6,10 +6,12 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
   BoxCubeIcon,
+  BoxIcon,
   CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
+  InfoIcon,
   ListIcon,
   PageIcon,
   PieChartIcon,
@@ -40,6 +42,26 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "العملاء",
     path: "/clients",
+  },
+    {
+    icon: <BoxIcon />,
+    name: "المنتجات",
+    path: "/products",
+  },
+    {
+    icon: <ListIcon />,
+    name: "الاقسام",
+    path: "/categories",
+  },
+    {
+    icon: <ListIcon />,
+    name: "طرق الدفع",
+    path: "/payment-methods",
+  },
+    {
+    icon: <ListIcon />,
+    name: "الوحدات",
+    path: "/units",
   },
   // {
   //   icon: <UserCircleIcon />,

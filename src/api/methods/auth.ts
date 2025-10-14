@@ -25,18 +25,15 @@ interface LogoutResponse {
   message?: string;
 }
 
-// 🟢 Login
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
   const { data } = await api.post<LoginResponse>('/api/login', payload);
 
   return data;
 }
 
-// 🔴 Logout
 export async function logout(): Promise<LogoutResponse> {
   const { data } = await api.post<LogoutResponse>('/api/logout');
 
-  // حذف البيانات من localStorage و Zustand
   localStorage.removeItem('token');
   localStorage.removeItem('user');
   useAuthStore.getState().clearAuth();
